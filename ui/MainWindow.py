@@ -8,6 +8,7 @@ from ui.FarmaceuticoWidget import FarmaceuticoWidget
 from ui.ProveedorWidget import ProveedorWidget
 from ui.CompraWidget import CompraWidget
 from ui.FacturaWidget import FacturaWidget
+from ui.DashboardWidget import DashboardWidget
 
 
 class MainWindow(QMainWindow):
@@ -56,6 +57,7 @@ class MainWindow(QMainWindow):
         tabs.tabBar().setExpanding(True)
 
         # Crear widgets y guardar referencias
+        self.dashboard_widget = DashboardWidget(self.controllers)
         self.cliente_widget = ClienteWidget(self.controllers["cliente"])
         self.medicamento_widget = MedicamentoWidget(self.controllers["medicamento"])
         self.farmaceutico_widget = FarmaceuticoWidget(self.controllers["farmaceutico"])
@@ -64,6 +66,7 @@ class MainWindow(QMainWindow):
         self.factura_widget = FacturaWidget(self.controllers["factura"])
 
         # Agregar cada widget como una pestaña
+        tabs.addTab(self.dashboard_widget, "Dashboard")
         tabs.addTab(self.cliente_widget, "Clientes")
         tabs.addTab(self.medicamento_widget, "Medicamentos")
         tabs.addTab(self.farmaceutico_widget, "Farmacéuticos")
@@ -85,6 +88,7 @@ class MainWindow(QMainWindow):
 
     def refresh_all_widgets(self):
         """Actualiza todos los widgets después de un undo/redo"""
+        self.dashboard_widget.cargar_datos()
         self.cliente_widget.cargar_clientes()
         self.medicamento_widget.cargar_medicamentos()
         self.farmaceutico_widget.cargar_farmaceuticos()
@@ -95,104 +99,111 @@ class MainWindow(QMainWindow):
     def apply_styles(self):
         stylesheet = """
         QMainWindow {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
         }
         
         QTabWidget::pane {
-            border: 1px solid #d0d0d0;
+            border: none;
+            background-color: #ffffff;
+            border-radius: 8px;
+            margin: 10px;
         }
         
         QTabBar::tab {
-            background-color: #e8e8e8;
-            color: #333333;
-            padding: 8px 10px;
-            border: 1px solid #c0c0c0;
-            border-bottom: none;
-            margin-right: 2px;
-            font-weight: 500;
-            min-width: 80px;
+            background-color: transparent;
+            color: #6c757d;
+            padding: 12px 20px;
+            margin: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 6px;
         }
         
         QTabBar::tab:selected {
-            background-color: #ffffff;
-            color: #0066cc;
-            border-bottom: 3px solid #0066cc;
+            background-color: #2c3e50;
+            color: #ffffff;
         }
         
-        QTabBar::tab:hover {
-            background-color: #f0f0f0;
+        QTabBar::tab:hover:!selected {
+            background-color: #e9ecef;
+            color: #495057;
         }
         
         QPushButton {
-            background-color: #0066cc;
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 6px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
         }
         
         QPushButton:hover {
-            background-color: #0052a3;
+            background-color: #2980b9;
         }
         
         QPushButton:pressed {
-            background-color: #003d7a;
+            background-color: #1c5980;
         }
         
         QPushButton#deleteBtn {
-            background-color: #dc3545;
+            background-color: #e74c3c;
         }
         
         QPushButton#deleteBtn:hover {
-            background-color: #c82333;
+            background-color: #c0392b;
         }
         
         QTableWidget {
-            background-color: white;
-            alternate-background-color: #f9f9f9;
-            gridline-color: #e0e0e0;
-            border: 1px solid #d0d0d0;
+            background-color: #ffffff;
+            alternate-background-color: #f8f9fa;
+            gridline-color: #ecf0f1;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 13px;
         }
         
         QTableWidget::item {
-            padding: 5px;
-            border: none;
+            padding: 8px;
+            border-bottom: 1px solid #ecf0f1;
+            color: #2c3e50;
         }
         
         QHeaderView::section {
-            background-color: #f0f0f0;
-            color: #333333;
-            padding: 5px;
+            background-color: #2c3e50;
+            color: #ffffff;
+            padding: 10px;
             border: none;
-            border-right: 1px solid #d0d0d0;
             font-weight: bold;
+            font-size: 13px;
         }
         
-        QLineEdit, QSpinBox, QDoubleSpinBox {
-            padding: 6px;
-            border: 1px solid #c0c0c0;
-            border-radius: 3px;
-            background-color: white;
-            font-size: 11px;
+        QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #ffffff;
+            font-size: 13px;
+            color: #495057;
         }
         
-        QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus {
-            border: 2px solid #0066cc;
+        QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
+            border: 1px solid #3498db;
         }
         
         QLabel {
-            color: #333333;
-            font-weight: 500;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 13px;
         }
         
         QDialog {
-            background-color: #f5f5f5;
+            background-color: #ffffff;
         }
         
         QMessageBox {
-            background-color: #f5f5f5;
+            background-color: #ffffff;
         }
         """
         self.setStyleSheet(stylesheet)
