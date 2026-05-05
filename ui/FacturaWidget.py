@@ -61,24 +61,36 @@ class FacturaWidget(QWidget):
             self.tabla.setItem(row, 3, QTableWidgetItem(medicamentos))
 
     def agregar_factura(self):
+        from PyQt5.QtWidgets import QComboBox, QListWidget, QAbstractItemView
         dialog = QDialog(self)
         dialog.setWindowTitle("Crear Nueva Factura")
         dialog.setMinimumWidth(400)
         layout = QVBoxLayout()
         
-        layout.addWidget(QLabel("ID del Cliente:"))
-        cli_input = QSpinBox()
-        cli_input.setMinimum(1)
-        layout.addWidget(cli_input)
+        layout.addWidget(QLabel("Seleccionar Cliente:"))
+        cli_combo = QComboBox()
+        clientes = list(self.controller.get_all_clientes())
+        for c in clientes:
+            cli_combo.addItem(c.nombre, c.cliente_id)
+        layout.addWidget(cli_combo)
         
-        layout.addWidget(QLabel("ID del Farmacéutico:"))
-        far_input = QSpinBox()
-        far_input.setMinimum(1)
-        layout.addWidget(far_input)
+        layout.addWidget(QLabel("Seleccionar Farmacéutico:"))
+        far_combo = QComboBox()
+        farmaceuticos = list(self.controller.get_all_farmaceuticos())
+        for f in farmaceuticos:
+            far_combo.addItem(f.nombre, f.farmaceutico_id)
+        layout.addWidget(far_combo)
         
-        layout.addWidget(QLabel("IDs de Medicamentos (separados por coma):"))
-        med_input = QLineEdit()
-        layout.addWidget(med_input)
+        layout.addWidget(QLabel("Seleccionar Medicamentos (Ctrl+Click para varios):"))
+        med_list = QListWidget()
+        med_list.setSelectionMode(QAbstractItemView.MultiSelection)
+        medicamentos = list(self.controller.get_all_medicamentos())
+        for m in medicamentos:
+            from PyQt5.QtWidgets import QListWidgetItem
+            item = QListWidgetItem(m.nombre)
+            item.setData(Qt.UserRole, m.medicamento_id)
+            med_list.addItem(item)
+        layout.addWidget(med_list)
         
         btn_layout = QHBoxLayout()
         btn_guardar = QPushButton("✓ Guardar")
@@ -87,24 +99,27 @@ class FacturaWidget(QWidget):
         btn_cancelar.setMinimumHeight(35)
         
         def guardar():
-            cli_id = cli_input.value()
-            far_id = far_input.value()
-            med_ids_text = med_input.text().strip()
+            if cli_combo.currentData() is None or far_combo.currentData() is None:
+                QMessageBox.warning(self, "Advertencia", "Debe seleccionar un cliente y un farmacéutico")
+                return
+                
+            cli_id = cli_combo.currentData()
+            far_id = far_combo.currentData()
+            selected_items = med_list.selectedItems()
+            
+            med_ids = [item.data(Qt.UserRole) for item in selected_items]
+            
+            if not med_ids:
+                QMessageBox.warning(self, "Validación", "Debe seleccionar al menos un medicamento")
+                return
             
             try:
-                med_ids = [int(x.strip()) for x in med_ids_text.split(",") if x.strip()]
-                if not med_ids:
-                    QMessageBox.warning(self, "Validación", "Debe ingresar al menos un medicamento")
-                    return
-                
                 if self.controller.insert_factura(cli_id, far_id, med_ids):
                     QMessageBox.information(self, "Éxito", "Factura creada correctamente")
                     dialog.accept()
                     self.cargar_facturas()
                 else:
                     QMessageBox.critical(self, "Error", "Cliente, Farmacéutico o Medicamento no encontrado")
-            except ValueError:
-                QMessageBox.critical(self, "Error", "Ingrese números válidos para los IDs")
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Error al crear: {str(e)}")
         

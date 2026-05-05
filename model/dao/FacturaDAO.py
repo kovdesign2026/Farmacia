@@ -9,15 +9,18 @@ from model.vo.VentaVO import VentaVO
 from model.vo.MedicamentoVO import MedicamentoVO
 from model.peewee.Factura import Factura
 from model.peewee.Venta import Venta
+from model.peewee.Cliente import Cliente
+from model.peewee.Farmaceutico import Farmaceutico
+from model.peewee.Medicamento import Medicamento
 
 class FacturaDAO:
 
     @staticmethod
     def get_all_facturas():
         """Retorna un generador que carga las facturas de forma perezosa (lazy loading)"""
-        # Usamos prefetch para cargar facturas, sus clientes, farmacéuticos y ventas en 2 consultas en lugar de N+1
-        query = Factura.select().order_by(Factura.factura_id)
-        facturas_with_ventas = prefetch(query, Venta.select())
+        # Usamos join para Cliente y Farmaceutico, y prefetch para Ventas (Eager Loading completo)
+        query = Factura.select(Factura, Cliente, Farmaceutico).join(Cliente).switch(Factura).join(Farmaceutico).order_by(Factura.factura_id)
+        facturas_with_ventas = prefetch(query, Venta.select(Venta, Medicamento).join(Medicamento))
         
         for p_i in facturas_with_ventas:
             cliente_vo = ClienteVO(

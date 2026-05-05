@@ -45,3 +45,12 @@ class FacturaController:
 
     def delete_factura(self, factura_id: int) -> None:
         self.factura_service.delete_factura(factura_id)
+
+    def get_all_clientes(self):
+        return self.cliente_service.get_all_clientes()
+
+    def get_all_farmaceuticos(self):
+        return self.farmaceutico_service.get_all_farmaceuticos()
+
+    def get_all_medicamentos(self):
+        return self.medicamento_service.get_all_medicamentos()

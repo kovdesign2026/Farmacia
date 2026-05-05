@@ -32,3 +32,9 @@ class CompraController:
 
     def delete_compra(self, compra_id: int) -> None:
         self.compra_service.delete_compra(compra_id)
+
+    def get_all_proveedores(self):
+        return self.proveedor_service.get_all_proveedores()
+
+    def get_all_medicamentos(self):
+        return self.medicamento_service.get_all_medicamentos()

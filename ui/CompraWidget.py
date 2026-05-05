@@ -57,20 +57,25 @@ class CompraWidget(QWidget):
             self.tabla.setItem(row, 2, QTableWidgetItem(compra.proveedor.razon_social))
 
     def agregar_compra(self):
+        from PyQt5.QtWidgets import QComboBox
         dialog = QDialog(self)
         dialog.setWindowTitle("Registrar Nueva Compra")
         dialog.setMinimumWidth(350)
         layout = QVBoxLayout()
         
-        layout.addWidget(QLabel("ID del Proveedor:"))
-        prov_input = QSpinBox()
-        prov_input.setMinimum(1)
-        layout.addWidget(prov_input)
+        layout.addWidget(QLabel("Seleccionar Proveedor:"))
+        prov_combo = QComboBox()
+        proveedores = list(self.controller.get_all_proveedores())
+        for p in proveedores:
+            prov_combo.addItem(p.razon_social, p.proveedor_id)
+        layout.addWidget(prov_combo)
         
-        layout.addWidget(QLabel("ID del Medicamento:"))
-        med_input = QSpinBox()
-        med_input.setMinimum(1)
-        layout.addWidget(med_input)
+        layout.addWidget(QLabel("Seleccionar Medicamento:"))
+        med_combo = QComboBox()
+        medicamentos = list(self.controller.get_all_medicamentos())
+        for m in medicamentos:
+            med_combo.addItem(m.nombre, m.medicamento_id)
+        layout.addWidget(med_combo)
         
         btn_layout = QHBoxLayout()
         btn_guardar = QPushButton("✓ Guardar")
@@ -79,8 +84,12 @@ class CompraWidget(QWidget):
         btn_cancelar.setMinimumHeight(35)
         
         def guardar():
-            prov_id = prov_input.value()
-            med_id = med_input.value()
+            if prov_combo.currentData() is None or med_combo.currentData() is None:
+                QMessageBox.warning(self, "Advertencia", "Debe seleccionar un proveedor y un medicamento")
+                return
+                
+            prov_id = prov_combo.currentData()
+            med_id = med_combo.currentData()
             try:
                 if self.controller.insert_compra(prov_id, med_id):
                     QMessageBox.information(self, "Éxito", "Compra registrada correctamente")
