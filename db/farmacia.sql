@@ -1,0 +1,51 @@
+-- DDL Farmacia
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS cliente (
+    cliente_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    dni VARCHAR(20) NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS farmaceutico (
+    farmaceutico_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    dni VARCHAR(20) NOT NULL UNIQUE,
+    nombre VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS medicamento (
+    medicamento_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    dosis REAL NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS factura (
+    factura_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    farmaceutico_id INTEGER NOT NULL REFERENCES farmaceutico(farmaceutico_id),
+    cliente_id INTEGER NOT NULL REFERENCES cliente(cliente_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS venta (
+    venta_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    factura_id INTEGER NOT NULL REFERENCES factura(factura_id),
+    medicamento_id INTEGER NOT NULL REFERENCES medicamento(medicamento_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS proveedor (
+    proveedor_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    razon_social VARCHAR(100) NOT NULL,
+    nit VARCHAR(20) NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS compra (
+    compra_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    proveedor_id INTEGER NOT NULL REFERENCES proveedor(proveedor_id),
+    medicamento_id INTEGER NOT NULL REFERENCES medicamento(medicamento_id),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
